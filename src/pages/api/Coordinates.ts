@@ -10,7 +10,7 @@ export default async function handler(req: any, res: any) {
   try {
     //5. Create a new chat completion request to GPT-4.
     const gpt4Completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         //6. Define the role of the system message and its content.
         { role: 'system', content: "You only return in JSON a coordinates key with a value in this format [43.6426, -79.3871], then a title of the location with a title key" },
