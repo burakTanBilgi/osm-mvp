@@ -1,15 +1,18 @@
-//1. Import dependencies for React, Leaflet and other functionalities.
+"use client";
 import React, { useState, useEffect, useRef, FC } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet-defaulticon-compatibility";
-//2. Define the interface for MarkerData.
+import ChatSidebar from "./ChatSidebar";
+
+// Define the interface for MarkerData
 interface MarkerData {
   coordinates: [number, number];
   title: string;
 }
-//3. Loader component for showing loading animation.
+
+// Loader component for showing loading animation
 const Loader = () => {
   return (
     <div className="absolute z-[10000] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -32,20 +35,24 @@ const Loader = () => {
     </div>
   );
 };
-//4. Main component definition.
+
+// Main component
 const MapComponent: FC = () => {
-  //5. Initialize local state.
+  // Initialize local state
   const [inputValue, setInputValue] = useState<string>("");
   const [markerData, setMarkerData] = useState<MarkerData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [submittedQuestion, setSubmittedQuestion] = useState<string | null>(null);
-  //6. Declare useRef to reference map.
+  
+  // Declare useRef to reference map
   const mapRef = useRef<any | null>(null);
-  //7. ZoomHandler component for handling map zoom events.
+
+  // ZoomHandler component for handling map zoom events
   const ZoomHandler: FC = () => {
-    //8. Use Leaflet's useMap hook.
+    // Use Leaflet's useMap hook
     const map = useMap();
-    //9. Function to fly map to given coordinates.
+    
+    // Function to fly map to given coordinates
     const flyToMarker = (coordinates: [number, number], zoom: number) => {
       if (coordinates && typeof coordinates[0] !== "undefined") {
         map.flyTo(coordinates, zoom, {
@@ -54,12 +61,14 @@ const MapComponent: FC = () => {
         });
       }
     };
+    
     useMapEvents({
       zoomend: () => {
         setLoading(false);
       },
     });
-    //10. useEffect to trigger the map fly when markerData changes.
+    
+    // useEffect to trigger the map fly when markerData changes
     useEffect(() => {
       if (markerData) {
         if (markerData.coordinates && typeof markerData.coordinates[0] !== "undefined") {
@@ -67,80 +76,76 @@ const MapComponent: FC = () => {
         }
       }
     }, [markerData]);
-    //11. Return null as we're not rendering anything in the DOM.
+    
+    // Return null as we're not rendering anything in the DOM
     return null;
   };
-  //12. Function to handle form submission.
-  const handleSubmit = async () => {
+  
+  // Function to handle search request from chat sidebar
+  const handleLocationSearch = async (query: string) => {
     setLoading(true);
     try {
-      //13. Set loading state and clear the input.
-      setSubmittedQuestion(inputValue);
+      // Set submitted question and clear the input
+      setSubmittedQuestion(query);
       setInputValue("");
-      //14. Make the API request using fetch.
+      
+      // Make the API request using fetch
       const response = await fetch("/api/Coordinates", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ value: inputValue }),
+        body: JSON.stringify({ value: query }),
       });
-      //15. Parse and set the response data.
+      
+      // Parse and set the response data
       const data = await response.json();
       setMarkerData(data);
     } catch (error) {
-      //16. Log errors.
+      // Log errors
       console.error(error);
+      setLoading(false);
     }
   };
-  //17. Return the JSX for rendering.
+  
+  
+  // Return the JSX for rendering
   return (
     <>
-      {/* 18. Show the loader if loading. */}
+      {/* Show the loader if loading */}
       {loading && <Loader />}
-      {/* 19. Conditionally render the title overlay. */}
+      
+      {/* Conditionally render the title overlay */}
       {markerData && markerData.coordinates && (
-        <div className="flex items-center justify-center absolute top-3 right-3 z-[100000]">
-          <h1 className="text-3xl font-bold text-black p-2 bg-white rounded-md z-[100000]">{markerData.title}</h1>
+        <div className="flex items-center justify-center absolute top-3 right-20 z-[1000]">
+          <h1 className="text-3xl font-bold text-black p-2 bg-white rounded-md">{markerData.title}</h1>
         </div>
       )}
-      {/* 20. Add the map container. */}
+      
+      {/* Add the map container */}
       <MapContainer center={[43.6426, -79.3871]} zoom={11} style={{ height: "100vh", width: "100vw" }}>
-        {/* 21. Set the tile layer for the map. */}
+        {/* Set the tile layer for the map */}
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {/* 22. Conditionally render the marker. */}
+        
+        {/* Conditionally render the marker */}
         {markerData && markerData.coordinates && (
           <Marker position={markerData.coordinates}>
             <Popup>{markerData.title}</Popup>
           </Marker>
         )}
-        {/* 23. Include the ZoomHandler for zoom events. */}
+        
+        {/* Include the ZoomHandler for zoom events */}
         <ZoomHandler />
       </MapContainer>
-      {/* 24. Include the form input, submit button and area for submitted question. */}
-      <div className="absolute bottom-5 left-0 w-full z-[10000] p-3">
-        <div className="flex justify-center">
-          {submittedQuestion && (
-            <div className="flex items-center justify-center bottom-16 absolute w-full z-[100000]">
-              <h1 className="text-3xl font-bold text-black p-2 bg-white rounded-md">{submittedQuestion}</h1>
-            </div>
-          )}
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="flex-grow p-2 border rounded-md"
-            onKeyPress={(e) => {
-              if (e.key === "Enter") handleSubmit();
-            }}
-          />
-          <button onClick={handleSubmit} className="p-2 ml-2 bg-blue-500 text-white rounded-md">
-            Submit
-          </button>
-        </div>
-      </div>
+      
+      {/* Add the consolidated chat sidebar */}
+      <ChatSidebar 
+        onSearchLocation={handleLocationSearch}
+        locationName={markerData?.title}
+        isLoading={loading}
+      />
     </>
   );
 };
-//25. Export the MapComponent.
+
 export default MapComponent;

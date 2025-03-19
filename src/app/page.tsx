@@ -1,10 +1,14 @@
 "use client";
 import dynamic from "next/dynamic";
-const DynamicMapComponent = dynamic(() => import("./components/MapComponent"), { ssr: false });
+
+// Dynamically import MapComponent with SSR disabled
+const DynamicMapComponent = dynamic(() => import("./components/MapComponent"), { 
+  ssr: false 
+});
 
 const MyPage = () => {
   return (
-    <div>
+    <div className="relative">
       <DynamicMapComponent />
     </div>
   );
