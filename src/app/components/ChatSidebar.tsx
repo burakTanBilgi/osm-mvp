@@ -55,7 +55,7 @@ useEffect(() => {
       if (recognitionRef.current) {
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = 'en-US';
+        recognitionRef.current.lang = 'tr-TR';
         
         recognitionRef.current.onresult = (event) => {
           const transcript = event.results[0][0].transcript;

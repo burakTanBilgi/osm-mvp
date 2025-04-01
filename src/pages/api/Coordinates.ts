@@ -23,7 +23,7 @@ export default async function handler(req: any, res: any) {
       messages: [
         { 
           role: 'system', 
-          content: "You are a location entity extractor. Your job is to identify and return ONLY the location mentioned in the user's query. Return just the location name without any additional text, explanations, or JSON formatting." 
+          content: "You are a location and place name extractor. Your job is to extract the location mentioned in the user's query and, if possible, a specific place associated with it (such as a landmark, restaurant, park, or beach). Return ONLY the location and place name in the format: 'Location Place'. If no specific place is mentioned, return just the location. Do not add explanations, punctuation, or formatting."
         },
         { role: 'user', content: req.body.value }
       ],
